@@ -23,10 +23,7 @@ import torch
 import torch.nn as nn
 import geffnet
 import json
-import requests
 
-
-# 이거 안쓰니까 난리남
 
 app = Flask(__name__)
 
@@ -35,6 +32,7 @@ file_name = './simpson_clf.pt'
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 print(device)
 
+# 이거 안쓰면 모델 로딩이 안된다;
 class SimpleEFN(nn.Module):
     def __init__(self, model_name='tf_efficientnet_b5_ns'):
         super().__init__()
@@ -75,7 +73,7 @@ def get_prediction(image_bytes):
 
 @app.route('/')
 def hello():
-    return 'Hello World!'
+    return 'Hello World!' #yes, I didn't fix it yet
 
 @app.route('/predict', methods=['POST'])
 def predict():
