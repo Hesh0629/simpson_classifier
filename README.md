@@ -1,5 +1,5 @@
 # simpson_classifier
-## Classifier for character in "The Simpsons"  (on progress)
+## Classifier for characters in "The Simpsons"  (on progress)
 <img src="./simpson_title.jpg"/>
 
 ## Dataset Info
