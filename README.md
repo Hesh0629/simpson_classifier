@@ -5,9 +5,9 @@
 ## Dataset Info
 (on progress)
 ## Model info
-I trained model with EfficientNet (https://arxiv.org/abs/1905.11946)  
-and use pre-trained model from geffnet (https://github.com/rwightman/gen-efficientnet-pytorch)  
-Due to GPU RAM capacity, I use 'tf_efficientnet_b5_ns' model with Image size = 456  
+I trained model with <b>EfficientNet</b> (https://arxiv.org/abs/1905.11946)  
+and use pre-trained model from <b>geffnet</b> (https://github.com/rwightman/gen-efficientnet-pytorch)  
+Due to GPU RAM capacity, I use <b>'tf_efficientnet_b5_ns'</b> model with <b>Image size = 456</b>  
 I applied data augmentation below using albumentations
 ```
 alb_train_transform = A.Compose([
