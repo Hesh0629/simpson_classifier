@@ -1,3 +1,8 @@
+# 1. 서버 실행 (flask run이 아닌 python 파일 실행해야 모델의 클래스 상속이 이루어짐)
+# 2. python 치고 interpreter 킨 다음에
+# 3. resp = requests.post("http://localhost:5000/predict", files={"file": open('./image_samples/{원하는 파일명}}.jpeg','rb')})
+# 4. resp.json() 에서 inference 결과 확인
+
 # Bart simpson 0
 # charles_monthomery 1
 # Krusty 2
@@ -8,7 +13,7 @@
 # Ned_flanders 7
 # principal_skinner 8
 
-from flask import Flask, jsonify
+from flask import Flask, jsonify, request
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 from PIL import Image
@@ -18,12 +23,21 @@ import torch
 import torch.nn as nn
 import geffnet
 import json
+import requests
 
 
 # 이거 안쓰니까 난리남
+
+app = Flask(__name__)
+
+simpson_class_index = json.load(open('./simpson_class_index.json'))
+file_name = './simpson_clf.pt' 
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+print(device)
+
 class SimpleEFN(nn.Module):
     def __init__(self, model_name='tf_efficientnet_b5_ns'):
-        super(SimpleEFN, self).__init__()
+        super().__init__()
         # Download pretrained model
         self.efn = geffnet.create_model(model_name, pretrained=True)
         self.feat = nn.Linear(self.efn.classifier.in_features, 9)
@@ -36,23 +50,9 @@ class SimpleEFN(nn.Module):
         x = self.extract(x)
         x = self.feat(x)
         return x
-
-app = Flask(__name__)
-
-simpson_class_index = json.load(open('./simpson_class_index.json'))
-file_name = './simpson_clf.pt' 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-print(device)
+    
 model = torch.load(file_name, device)
 model.eval()
-
-@app.route('/')
-def hello():
-    return 'Hello World!'
-
-@app.route('/predict', methods=['POST'])
-def predict():
-    return jsonify({'class_id': 'IMAGE_NET_XXX', 'class_name': 'Cat'})
 
 def transform_image(image_bytes):
     image_size=456
@@ -72,7 +72,19 @@ def get_prediction(image_bytes):
     _, y_hat = outputs.max(1)
     predicted_idx = str(y_hat.item())
     return simpson_class_index[predicted_idx]
-    
-with open("./image_samples/milhouse.jpeg", 'rb') as f:
-    image_bytes = f.read()
-    print(get_prediction(image_bytes))
+
+@app.route('/')
+def hello():
+    return 'Hello World!'
+
+@app.route('/predict', methods=['POST'])
+def predict():
+    if request.method == 'POST':
+        file = request.files['file']
+        img_bytes = file.read()
+        class_id, class_name = get_prediction(image_bytes=img_bytes)
+        return jsonify({'class_id': class_id, 'class_name': class_name})
+ 
+ 
+if __name__ == '__main__':
+    app.run()
